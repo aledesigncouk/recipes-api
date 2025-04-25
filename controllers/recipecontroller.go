@@ -17,7 +17,7 @@ import (
 )
 
 var validate = validator.New()
-var recipeCollection *mongo.Collection = config.GetCollection(config.DB, "recipes") // get the recipes collection
+var recipeCollection *mongo.Collection = config.GetCollection(config.DB, "recipes")
 
 func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -25,7 +25,6 @@ func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	var recipe models.Recipe
 
-	// validate the request body
 	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := map[string]interface{}{"message": err.Error()}
@@ -33,7 +32,6 @@ func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// use the validator library to validate required fields
 	if validationErr := validate.Struct(&recipe); validationErr != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := map[string]interface{}{"message": validationErr.Error()}
@@ -42,8 +40,8 @@ func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newRecipe := models.Recipe{
-		Id: primitive.NewObjectID(),
-		// ID:                 recipe.ID,
+		ObjectId:           primitive.NewObjectID(),
+		ID:                 recipe.ID,
 		Name:               recipe.Name,
 		Ingredients:        recipe.Ingredients,
 		Instructions:       recipe.Instructions,
@@ -76,13 +74,14 @@ func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 func GetRecipe(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	params := mux.Vars(r)
-	recipeId := params["recipeId"]
-	var recipe models.Recipe
+	rcipeId := params["recipeId"]
 	defer cancel()
 
-	objId, _ := primitive.ObjectIDFromHex(recipeId)
+	objId, _ := primitive.ObjectIDFromHex(rcipeId)
+	var recipe models.Recipe
 
-	err := recipeCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&recipe)
+	err := recipeCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&recipe)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := map[string]interface{}{"message": err.Error()}
@@ -95,6 +94,7 @@ func GetRecipe(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditRecipe(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	params := mux.Vars(r)
 	recipeId := params["recipeId"]
@@ -103,7 +103,6 @@ func EditRecipe(w http.ResponseWriter, r *http.Request) {
 
 	objId, _ := primitive.ObjectIDFromHex(recipeId)
 
-	// validate the request body
 	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := map[string]interface{}{"message": err.Error()}
@@ -111,7 +110,6 @@ func EditRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// use the validator library to validate required fields
 	if validationErr := validate.Struct(&recipe); validationErr != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := map[string]interface{}{"message": validationErr.Error()}
@@ -137,7 +135,7 @@ func EditRecipe(w http.ResponseWriter, r *http.Request) {
 		"mealType":           recipe.MealType,
 	}
 
-	result, err := recipeCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+	result, err := recipeCollection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": update})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := map[string]interface{}{"message": err.Error()}
@@ -145,10 +143,9 @@ func EditRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get updated recipe details
 	var updatedRecipe models.Recipe
 	if result.MatchedCount == 1 {
-		err := recipeCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedRecipe)
+		err := recipeCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&updatedRecipe)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			response := map[string]interface{}{"message": err.Error()}
@@ -169,7 +166,7 @@ func DeleteRecipe(w http.ResponseWriter, r *http.Request) {
 
 	objId, _ := primitive.ObjectIDFromHex(recipeId)
 
-	result, err := recipeCollection.DeleteOne(ctx, bson.M{"id": objId})
+	result, err := recipeCollection.DeleteOne(ctx, bson.M{"_id": objId})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := map[string]interface{}{"message": err.Error()}
@@ -195,6 +192,7 @@ func GetAllRecipes(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	results, err := recipeCollection.Find(ctx, bson.M{})
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := map[string]interface{}{"message": err.Error()}
@@ -202,7 +200,6 @@ func GetAllRecipes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// reading from the db in an optimal way
 	defer results.Close(ctx)
 	for results.Next(ctx) {
 		var singleRecipe models.Recipe

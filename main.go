@@ -12,13 +12,9 @@ import (
 )
 
 func main() {
-	// Connect to MongoDB
 	config.ConnectDB()
 
-	// Init Router
 	router := mux.NewRouter()
-
-	// Route Handlers / Endpoints
 	routes.RecipeRoute(router)
 
 	fmt.Println("Starting the application...")

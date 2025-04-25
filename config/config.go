@@ -3,41 +3,30 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ConnectDB() *mongo.Client {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+func ConnectDB() (*mongo.Client, error) {
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(context.Background(), clientOptions)
+
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	err = client.Connect(ctx)
+	err = client.Ping(context.Background(), nil)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	// ping the database
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	fmt.Println("Connected to MongoDB")
-	return client
+	return client, nil
 }
 
-// Client instance
-var DB *mongo.Client = ConnectDB()
+var DB, _ = ConnectDB()
 
-// getting database collections
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	collection := client.Database("recipes_db").Collection(collectionName)
 	return collection
