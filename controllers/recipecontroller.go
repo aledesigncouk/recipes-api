@@ -17,7 +17,7 @@ import (
 )
 
 var validate = validator.New()
-var recipeCollection *mongo.Collection = config.GetCollection(config.DB, "recipes")
+var recipeCollection *mongo.Collection = config.GetCollection(config.DB)
 
 func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -74,10 +74,10 @@ func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 func GetRecipe(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	params := mux.Vars(r)
-	rcipeId := params["recipeId"]
+	recipeId := params["recipeId"]
 	defer cancel()
 
-	objId, _ := primitive.ObjectIDFromHex(rcipeId)
+	objId, _ := primitive.ObjectIDFromHex(recipeId)
 	var recipe models.Recipe
 
 	err := recipeCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&recipe)

@@ -12,7 +12,12 @@ import (
 )
 
 func main() {
-	config.ConnectDB()
+	var err error
+	config.DB, _ = config.ConnectDB()
+
+	if err != nil {
+		log.Fatal("Failed to connect to database", err)
+	}
 
 	router := mux.NewRouter()
 	routes.RecipeRoute(router)
