@@ -6,32 +6,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var DB *mongo.Client
 
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("No .env file found, relying on environment variables")
-	}
-
-	DB, err = ConnectDB()
-	if err != nil {
-		log.Fatalf("Could not connect to the database: %v", err)
-	}
-}
-
-func ConnectDB() (*mongo.Client, error) {
-	dbURI := os.Getenv("DB_URI")
-
-	if dbURI == "" {
-		return nil, fmt.Errorf("DB_URI not found")
-	}
+func ConnectDB(dbURI string) (*mongo.Client, error) {
 
 	clientOptions := options.Client().ApplyURI(dbURI)
 	client, err := mongo.Connect(context.Background(), clientOptions)
@@ -50,10 +31,16 @@ func ConnectDB() (*mongo.Client, error) {
 }
 
 func GetCollection(client *mongo.Client) *mongo.Collection {
-	collectionName := os.Getenv("DB_COLLECTION")
+	collection := os.Getenv("DB_COLLECTION")
 	dbName := os.Getenv("DB_NAME")
 
-	// handle missing env variables
+	if client == nil {
+		log.Fatal("mongo client is nil")
+	}
 
-	return DB.Database(dbName).Collection(collectionName)
+	if collection == "" || dbName == "" {
+		log.Fatal("DB_COLLECTION or DB_NAME env variable missing")
+	}
+
+	return client.Database(dbName).Collection(collection)
 }
