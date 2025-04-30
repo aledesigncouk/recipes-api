@@ -10,7 +10,7 @@ import (
 	"os"
 	"recipes-api/config"
 	"recipes-api/handlers"
-	"recipes-api/models"
+	"recipes-api/mockdata"
 	"recipes-api/testutils"
 	"testing"
 
@@ -44,24 +44,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateRecipe(t *testing.T) {
-	recipe := models.Recipe{
-		Name:               "Test Pizza",
-		Ingredients:        []string{"Flour", "Tomato"},
-		Instructions:       []string{"Mix", "Bake"},
-		PrepTimeMinutes:    15,
-		CookTimeMinutes:    20,
-		Servings:           2,
-		Difficulty:         "Easy",
-		Cuisine:            "Italian",
-		CaloriesPerServing: 300,
-		Tags:               []string{"dinner"},
-		UserID:             1,
-		Image:              "pizza.jpg",
-		Rating:             4.5,
-		ReviewCount:        12,
-		MealType:           []string{"dinner"},
-	}
-	body, _ := json.Marshal(recipe)
+	body, _ := json.Marshal(mockdata.MockRecipe)
 
 	req, _ := http.NewRequest("POST", "/recipe", bytes.NewBuffer(body))
 	res := httptest.NewRecorder()

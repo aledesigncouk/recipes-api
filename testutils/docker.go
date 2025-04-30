@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"recipes-api/mockdata"
+
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -39,15 +40,9 @@ func StartMongoContainer(ctx context.Context, dbName string, collectionName stri
 		return nil, "", nil, err
 	}
 
-	db := client.Database(dbName)
-	collection := db.Collection(collectionName)
+	collection := client.Database(dbName).Collection(collectionName)
 
-	mockData := []interface{}{
-		bson.D{{"name", "Test Recipe 1"}, {"ingredients", []string{"Ingredient 1", "Ingredient 2"}}, {"instructions", []string{"Instruction 1", "Instruction 2"}}},
-		bson.D{{"name", "Test Recipe 2"}, {"ingredients", []string{"Ingredient 3", "Ingredient 4"}}, {"instructions", []string{"Instruction 3", "Instruction 4"}}},
-	}
-
-	_, err = collection.InsertMany(ctx, mockData)
+	_, err = collection.InsertMany(ctx, mockdata.MockRecipes)
 	if err != nil {
 		log.Printf("Error inserting mock data: %v", err)
 		return nil, "", nil, err
