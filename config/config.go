@@ -29,7 +29,6 @@ func ConnectDB(dbURI string) (*mongo.Client, error) {
 	return client, nil
 }
 
-// GetCollection returns a Mongo collection from a given client, database name, and collection name.
 func GetCollection(client *mongo.Client, dbName, collectionName string) (*mongo.Collection, error) {
 	if client == nil {
 		return nil, fmt.Errorf("mongo client is nil")
@@ -40,7 +39,6 @@ func GetCollection(client *mongo.Client, dbName, collectionName string) (*mongo.
 	return client.Database(dbName).Collection(collectionName), nil
 }
 
-// LoadConfigFromEnv loads the database name and collection name from the environment.
 func LoadConfigFromEnv() (string, string, error) {
 	dbName := os.Getenv("DB_NAME")
 	collection := os.Getenv("DB_COLLECTION")
