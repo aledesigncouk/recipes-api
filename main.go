@@ -25,7 +25,9 @@ func main() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	collection := config.GetCollection(config.DB)
+	dbName, collectionName, _ := config.LoadConfigFromEnv()
+
+	collection, _ := config.GetCollection(config.DB, dbName, collectionName)
 	router := handlers.Router(collection)
 
 	fmt.Println("Starting the application...")

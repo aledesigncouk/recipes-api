@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,17 +29,25 @@ func ConnectDB(dbURI string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func GetCollection(client *mongo.Client) *mongo.Collection {
-	collection := os.Getenv("DB_COLLECTION")
-	dbName := os.Getenv("DB_NAME")
-
+// GetCollection returns a Mongo collection from a given client, database name, and collection name.
+func GetCollection(client *mongo.Client, dbName, collectionName string) (*mongo.Collection, error) {
 	if client == nil {
-		log.Fatal("mongo client is nil")
+		return nil, fmt.Errorf("mongo client is nil")
+	}
+	if dbName == "" || collectionName == "" {
+		return nil, fmt.Errorf("dbName or collectionName is empty")
+	}
+	return client.Database(dbName).Collection(collectionName), nil
+}
+
+// LoadConfigFromEnv loads the database name and collection name from the environment.
+func LoadConfigFromEnv() (string, string, error) {
+	dbName := os.Getenv("DB_NAME")
+	collection := os.Getenv("DB_COLLECTION")
+
+	if dbName == "" || collection == "" {
+		return "", "", fmt.Errorf("DB_NAME or DB_COLLECTION env variable missing")
 	}
 
-	if collection == "" || dbName == "" {
-		log.Fatal("DB_COLLECTION or DB_NAME env variable missing")
-	}
-
-	return client.Database(dbName).Collection(collection)
+	return dbName, collection, nil
 }
