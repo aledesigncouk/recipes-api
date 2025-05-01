@@ -76,3 +76,42 @@ func TestGetRecipeByID(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, res.Code)
 }
+
+func TestEditRecipe(t *testing.T) {
+	ctx := context.Background()
+
+	inserted, err := config.DB.Database("testdb").Collection("testcollection").InsertOne(ctx, mockdata.MockRecipe)
+	if err != nil {
+		t.Fatalf("Failed to insert mock recipe: %v", err)
+	}
+
+	id := inserted.InsertedID.(primitive.ObjectID).Hex()
+
+	updatedRecipe := mockdata.MockRecipe
+	updatedRecipe.Name = "Updated Name"
+
+	body, _ := json.Marshal(updatedRecipe)
+
+	req, _ := http.NewRequest("PUT", "/recipe/"+id, bytes.NewBuffer(body))
+	res := httptest.NewRecorder()
+	testRouter.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+}
+func TestDeleteRecipe(t *testing.T) {
+	ctx := context.Background()
+
+	inserted, err := config.DB.Database("testdb").Collection("testcollection").InsertOne(ctx, mockdata.MockRecipe)
+	if err != nil {
+		t.Fatalf("Failed to insert mock recipe: %v", err)
+	}
+
+	id := inserted.InsertedID.(primitive.ObjectID).Hex()
+
+	req, _ := http.NewRequest("DELETE", "/recipe/"+id, nil)
+	res := httptest.NewRecorder()
+	testRouter.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+
+}
