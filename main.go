@@ -4,18 +4,31 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"recipes-api/config"
-	"recipes-api/routes"
+	"recipes-api/handlers"
 
-	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	config.ConnectDB()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	router := mux.NewRouter()
-	routes.RecipeRoute(router)
+	dbURI := os.Getenv("DB_URI")
+	config.DB, err = config.ConnectDB(dbURI)
+
+	if err != nil {
+		log.Fatal("Failed to connect to database: ", err)
+	}
+
+	dbName, collectionName, _ := config.LoadConfigFromEnv()
+
+	collection, _ := config.GetCollection(config.DB, dbName, collectionName)
+	router := handlers.Router(collection)
 
 	fmt.Println("Starting the application...")
 	log.Fatal(http.ListenAndServe(":8080", router))
