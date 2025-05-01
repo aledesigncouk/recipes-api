@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-playground/assert/v2"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -55,6 +56,21 @@ func TestCreateRecipe(t *testing.T) {
 
 func TestGetAllRecipes(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/recipes", nil)
+	res := httptest.NewRecorder()
+	testRouter.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+}
+
+func TestGetRecipeByID(t *testing.T) {
+	inserted, err := config.DB.Database("testdb").Collection("testcollection").InsertOne(context.Background(), mockdata.MockRecipe)
+	if err != nil {
+		t.Fatalf("Failed to insert mock recipe: %v", err)
+	}
+
+	id := inserted.InsertedID.(primitive.ObjectID).Hex()
+
+	req, _ := http.NewRequest("GET", "/recipe/"+id, nil)
 	res := httptest.NewRecorder()
 	testRouter.ServeHTTP(res, req)
 
