@@ -17,8 +17,19 @@ import (
 
 var validate = validator.New()
 
+// @Summary Create a new recipe
+// @Description Adds a new recipe to the database
+// @Tags recipes
+// @Accept json
+// @Produce json
+// @Param recipe body models.Recipe true "Recipe Data"
+// @Success 201 {object} models.Recipe
+// @Failure 400 {object} string
+// @Router /recipe [post]
 func CreateRecipe(collection *mongo.Collection) http.HandlerFunc {
+	// TODO: consider accept and return the ID
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
@@ -38,7 +49,7 @@ func CreateRecipe(collection *mongo.Collection) http.HandlerFunc {
 		}
 
 		newRecipe := models.Recipe{
-			ObjectId:           primitive.NewObjectID(),
+			// ObjectId:           primitive.NewObjectID(),
 			ID:                 recipe.ID,
 			Name:               recipe.Name,
 			Ingredients:        recipe.Ingredients,
@@ -57,7 +68,8 @@ func CreateRecipe(collection *mongo.Collection) http.HandlerFunc {
 			MealType:           recipe.MealType,
 		}
 
-		result, err := collection.InsertOne(ctx, newRecipe)
+		// result, err := collection.InsertOne(ctx, newRecipe)
+		_, err := collection.InsertOne(ctx, newRecipe)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			response := map[string]interface{}{"message": err.Error()}
@@ -66,12 +78,22 @@ func CreateRecipe(collection *mongo.Collection) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(result)
+		// json.NewEncoder(w).Encode(result)
+		json.NewEncoder(w).Encode(newRecipe)
 	}
 }
 
+// @Summary Get a recipe
+// @Description Get a recipe by ID
+// @Tags recipes
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.Recipe
+// @Failure 400 {object} string
+// @Router /recipe/{recipeId} [get]
 func GetRecipe(collection *mongo.Collection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
@@ -96,6 +118,15 @@ func GetRecipe(collection *mongo.Collection) http.HandlerFunc {
 	}
 }
 
+// @Summary Edit a recipe
+// @Description Edit a recipe by ID
+// @Tags recipes
+// @Accept json
+// @Produce json
+// @Param id path string true "Recipe ID"
+// @Success 200 {object} models.Recipe
+// @Failure 400 {object} string
+// @Router /recipe/{recipeId} [post]
 func EditRecipe(collection *mongo.Collection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -160,8 +191,18 @@ func EditRecipe(collection *mongo.Collection) http.HandlerFunc {
 	}
 }
 
+// @Summary Delete a recipe
+// @Description Delete a recipe by ID
+// @Tags recipes
+// @Accept json
+// @Produce json
+// @Param id path string true "Recipe ID"
+// @Success 200 {object} models.Recipe
+// @Failure 400 {object} string
+// @Router /recipe/{recipeId} [post]
 func DeleteRecipe(collection *mongo.Collection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
@@ -190,6 +231,14 @@ func DeleteRecipe(collection *mongo.Collection) http.HandlerFunc {
 	}
 }
 
+// @Summary Get all recipes
+// @Description Get all recipes
+// @Tags recipes
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.Recipe
+// @Failure 400 {object} string
+// @Router /recipes [get]
 func GetAllRecipes(collection *mongo.Collection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

@@ -1,0 +1,139 @@
+definitions:
+  models.Recipe:
+    properties:
+      _id:
+        type: string
+      caloriesPerServing:
+        type: integer
+      cookTimeMinutes:
+        type: integer
+      cuisine:
+        type: string
+      difficulty:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      ingredients:
+        items:
+          type: string
+        type: array
+      instructions:
+        items:
+          type: string
+        type: array
+      mealType:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      prepTimeMinutes:
+        type: integer
+      rating:
+        type: number
+      reviewCount:
+        type: integer
+      servings:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      userId:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /recipe:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new recipe to the database
+      parameters:
+      - description: Recipe Data
+        in: body
+        name: recipe
+        required: true
+        schema:
+          $ref: '#/definitions/models.Recipe'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Recipe'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Create a new recipe
+      tags:
+      - recipes
+  /recipe/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a recipe by ID
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Recipe'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get a recipe
+      tags:
+      - recipes
+    post:
+      consumes:
+      - application/json
+      description: Delete a recipe by ID
+      parameters:
+      - description: Recipe Data
+        in: body
+        name: recipe
+        required: true
+        schema:
+          $ref: '#/definitions/models.Recipe'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Recipe'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Delete a recipe
+      tags:
+      - recipes
+  /recipes:
+    get:
+      consumes:
+      - application/json
+      description: Get all recipes
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Recipe'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get all recipes
+      tags:
+      - recipes
+swagger: "2.0"
