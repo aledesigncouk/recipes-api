@@ -1,0 +1,68 @@
+# Recipes API
+
+A simple RESTful API built with Go and MongoDB for managing recipes.  
+Includes full CRUD functionality and uses Docker-based MongoDB in tests with Testcontainers.
+
+---
+
+##  Features
+
+- Create, read, update, and delete recipes
+- Built with Gorilla Mux and the official MongoDB Go driver
+- Modular structure for config, handlers, and models
+- Test suite using `testcontainers-go` to spin up MongoDB containers
+- Environment configuration with `.env` files
+- Ready to deploy or extend
+
+---
+
+## Tech Stack
+
+- Go 1.20+
+- MongoDB
+- Gorilla Mux
+- Testcontainers-Go
+- Docker (for testing)
+
+---
+
+##  Installation
+
+```bash
+git clone https://github.com/your-username/recipes-api.git
+cd recipes-api
+go mod tidy
+```
+
+
+## Configuration
+
+Create a .env file in the root of the project:
+```
+DB_URI=mongodb://localhost:27017
+DB_NAME=recipesdb
+```
+### Running Tests
+
+Tests will spin up a temporary MongoDB container using Testcontainers.
+```
+go test ./...
+```
+To avoid cached test results:
+```
+go clean -testcache
+```
+## Running the Server
+
+Start your MongoDB instance locally, then:
+```
+go run .
+```
+The server will be available at http://localhost:8080.
+📬 API Endpoints
+Method	Endpoint	Description
+POST	/recipe	Create a new recipe
+GET	/recipe/{id}	Get a recipe by ID
+PUT	/recipe/{id}	Update a recipe
+DELETE	/recipe/{id}	Delete a recipe
+GET	/recipes	Get all recipes
