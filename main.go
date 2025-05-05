@@ -13,12 +13,23 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+
+	var err error
+
+	if os.Getenv("ENV") == "test" {
+		err = godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	dbURI := os.Getenv("DB_URI")
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8080"
+	}
+
 	config.DB, err = config.ConnectDB(dbURI)
 
 	if err != nil {
@@ -31,5 +42,5 @@ func main() {
 	router := handlers.Router(collection)
 
 	fmt.Println("Starting the application...")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

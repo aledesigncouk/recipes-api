@@ -1,6 +1,6 @@
 module recipes-api
 
-go 1.24.2
+go 1.24
 
 require (
 	github.com/go-playground/assert/v2 v2.2.0
