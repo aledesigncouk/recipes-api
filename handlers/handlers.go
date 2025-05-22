@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -245,16 +246,30 @@ func GetAllRecipes(collection *mongo.Collection) http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		cursor, err := collection.Find(ctx, bson.M{})
+		projection :=
+			bson.M{
+				"_id":             1,
+				"name":            1,
+				"image":           1,
+				"rating":          1,
+				"prepTimeMinutes": 1,
+				"cookTimeMinutes": 1,
+				"difficulty":      1,
+			}
+
+		findOptions := options.Find().SetProjection(projection)
+
+		cursor, err := collection.Find(ctx, bson.M{}, findOptions)
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer cursor.Close(ctx)
 
-		var recipes []models.Recipe
+		var recipes []bson.M
 		for cursor.Next(ctx) {
-			var recipe models.Recipe
+			var recipe bson.M
 			if err := cursor.Decode(&recipe); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
